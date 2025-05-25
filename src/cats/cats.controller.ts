@@ -11,9 +11,9 @@ import {
     Req,
 } from '@nestjs/common'
 import { Observable, of } from 'rxjs'
-import { CatsService } from 'src/cats/cats.service'
-import { CreateCatDto } from 'src/cats/dto/create-cat.dto'
-import { Cat } from 'src/cats/interfaces/cat.interface'
+import { CatsService } from './cats.service'
+import { CreateCatDto } from './dto/create-cat.dto'
+import { Cat } from './interfaces/cat.interface'
 
 // nest g controller cats 명령어로 생성된 컨트롤러 클래스. 자동으로 보일러 플레이트를 생성해줌.
 // @Controller('공통적으로 적용될 path prefix')
