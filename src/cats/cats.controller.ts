@@ -1,0 +1,60 @@
+import {
+    Controller,
+    Get,
+    Header,
+    HttpCode,
+    Param,
+    Post,
+    Redirect,
+    Req,
+} from '@nestjs/common'
+
+// nest g controller cats 명령어로 생성된 컨트롤러 클래스. 자동으로 보일러 플레이트를 생성해줌.
+// @Controller('공통적으로 적용될 path prefix')
+@Controller('cats')
+export class CatsController {
+    // private userSpecificData: string
+    // 이런 식으로 요청별 데이터를 인스턴스 변수에 저장하면 안 됩니다! api endpoint는 stateless 해야 함.
+    // 따라서 요청별 데이터를 저장하려면 요청 객체를 인자로 받아서 사용해야 함.
+
+    @Post()
+    // @HttpCode(204)
+    // @Header('Cache-Control', 'no-store')
+    create(@Req() request: Request): string {
+        return 'This action adds a new cat'
+    }
+    // @Get() 데코레이터는 findAll 메서드가 경로에 대한 HTTP GET 요청을 처리하는 핸들러 메서드임을 나타냄.
+    @Get()
+    findAll(): string {
+        // 값만 리턴해라. 직렬화는 NestJS가 알아서 해준다.
+        return 'This action returns all cats'
+    }
+
+    @Get(':id')
+    findOne(@Param('id') id: string): string {
+        console.log(id)
+        return `This action returns a #${id} cat`
+    }
+
+    // @Get(':id')
+    // findOne(@Param() params: any): string {
+    //     console.log(params.id)
+    //     return `This action returns a #${params.id} cat`
+    // }
+
+    // @Get()
+    // findForUser(@Req() request: Request): string {
+    //     this.userSpecificData = request.headers['x-user-id'] // 여러 요청이 동시에 접근 시 문제 발생
+    //     // ... this.userSpecificData를 사용하는 로직 ...
+    //     console.log(`Processing data for user: ${this.userSpecificData}`) // 다른 요청에 의해 훼손될 수 있음
+    //     return `Data for ${this.userSpecificData}`
+    // }
+
+    // @Get('details')
+    // getDetails(@Req() request: Request): string {
+    //     const tenantId = request.headers['x-tenant-id']
+    //     // tenantId는 이 메소드 호출 내에서만 유효합니다.
+    //     // 필요한 로직을 여기서 처리하거나 서비스 계층으로 전달합니다.
+    //     return `Details for tenant ${tenantId}`
+    // }
+}
