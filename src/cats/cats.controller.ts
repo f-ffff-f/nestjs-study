@@ -1,13 +1,17 @@
 import {
+    Body,
     Controller,
     Get,
     Header,
     HttpCode,
     Param,
     Post,
+    Query,
     Redirect,
     Req,
 } from '@nestjs/common'
+import { Observable, of } from 'rxjs'
+import { CreateCatDto } from 'src/cats/create-cat.dto'
 
 // nest g controller cats 명령어로 생성된 컨트롤러 클래스. 자동으로 보일러 플레이트를 생성해줌.
 // @Controller('공통적으로 적용될 path prefix')
@@ -20,14 +24,34 @@ export class CatsController {
     @Post()
     // @HttpCode(204)
     // @Header('Cache-Control', 'no-store')
-    create(@Req() request: Request): string {
+    create(@Body() createCatDto: CreateCatDto): string {
         return 'This action adds a new cat'
     }
     // @Get() 데코레이터는 findAll 메서드가 경로에 대한 HTTP GET 요청을 처리하는 핸들러 메서드임을 나타냄.
+    // @Get()
+    // findAll(): string {
+    //     // 값만 리턴해라. 직렬화는 NestJS가 알아서 해준다.
+    //     return 'This action returns all cats'
+    // }
+
+    // @Get()
+    // async findAll(): Promise<any[]> {
+    //     await new Promise((resolve) => setTimeout(resolve, 1000))
+    //     return []
+    // }
+    // @Get()
+    // findAll(): Observable<any[]> {
+    //     return of([])
+    // }
+
     @Get()
-    findAll(): string {
-        // 값만 리턴해라. 직렬화는 NestJS가 알아서 해준다.
-        return 'This action returns all cats'
+    findAll(
+        @Query('age') age: number,
+        @Query('breed') breed: string
+    ): Observable<string> {
+        return of(
+            `This action returns all cats filtered by age: ${age} and breed: ${breed}`
+        )
     }
 
     @Get(':id')
