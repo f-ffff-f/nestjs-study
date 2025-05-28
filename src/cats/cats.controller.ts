@@ -4,16 +4,22 @@ import {
     Get,
     Header,
     HttpCode,
+    HttpException,
+    HttpStatus,
     Param,
+    ParseIntPipe,
     Post,
     Query,
     Redirect,
     Req,
+    UsePipes,
 } from '@nestjs/common'
 import { Observable, of } from 'rxjs'
 import { CatsService } from './cats.service'
 import { CreateCatDto } from './dto/create-cat.dto'
 import { Cat } from './interfaces/cat.interface'
+import { JoiValidationPipe } from 'src/cats/pipe/joi-validation.pipe'
+import { createCatSchema } from './schemas/create-cat.schema'
 
 // nest g controller cats 명령어로 생성된 컨트롤러 클래스. 자동으로 보일러 플레이트를 생성해줌.
 // @Controller('공통적으로 적용될 path prefix')
@@ -28,6 +34,7 @@ export class CatsController {
     // 따라서 요청별 데이터를 저장하려면 요청 객체를 인자로 받아서 사용해야 함.
 
     @Post()
+    @UsePipes(new JoiValidationPipe(createCatSchema))
     // @HttpCode(204)
     // @Header('Cache-Control', 'no-store')
     // 클래스는 자바스크립트 ES6 표준의 한 부분이므로 자바스크립트로 컴파일 될 때, 사라지지 않고 실제 요소로 보존 그렇기 때문에 Pipes 같은 기능에서 런타임에 변수의 메타타입에 접근할 수 있음. 따서 DTO는 클래스로 선언하는 것이 좋음.
@@ -49,6 +56,8 @@ export class CatsController {
     @Get()
     findAll(): Observable<Cat[]> {
         return of(this.catsService.findAll())
+        // NestJS가 제공하는 표준 예외처리. 유저에게 전송됨.
+        // throw new HttpException('Forbidden', HttpStatus.FORBIDDEN)
     }
 
     // @Get()
@@ -62,9 +71,16 @@ export class CatsController {
     // }
 
     @Get(':id')
-    findOne(@Param('id') id: string): string {
-        console.log(id)
-        return `This action returns a #${id} cat`
+    // id 파라미터에 파이프 적용
+    // findOne(@Param('id', ParseIntPipe) id: number): Cat {
+    findOne(
+        @Param(
+            'id',
+            new ParseIntPipe({ errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE })
+        )
+        id: number
+    ): Cat {
+        return this.catsService.findOne(id)
     }
 
     // @Get(':id')
