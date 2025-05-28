@@ -1,0 +1,35 @@
+# Development Dockerfile with hot reload
+FROM node:18-alpine
+
+# Install pnpm globally
+RUN npm install -g pnpm
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files
+COPY package.json pnpm-lock.yaml ./
+
+# Install all dependencies (including dev dependencies)
+RUN pnpm install --frozen-lockfile
+
+# Copy source code
+COPY . .
+
+# Create non-root user for security
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S nestjs -u 1001
+
+# Change ownership of the app directory
+RUN chown -R nestjs:nodejs /app
+USER nestjs
+
+# Expose port
+EXPOSE 3001
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:3001/ || exit 1
+
+# Start the application in development mode with hot reload
+CMD ["pnpm", "run", "start:dev"] 

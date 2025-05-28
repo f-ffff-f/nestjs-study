@@ -1,0 +1,93 @@
+version: '3.8'
+
+services:
+    # PostgreSQL Database Service
+    postgres:
+        image: postgres:15-alpine
+        container_name: nestjs-postgres
+        restart: unless-stopped
+        environment:
+            POSTGRES_DB: nestjs_db
+            POSTGRES_USER: nestjs_user
+            POSTGRES_PASSWORD: nestjs_password
+            POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+            - '5432:5432'
+        volumes:
+            - postgres_data:/var/lib/postgresql/data
+            - ./init-db:/docker-entrypoint-initdb.d
+        networks:
+            - nestjs-network
+        healthcheck:
+            test: ['CMD-SHELL', 'pg_isready -U nestjs_user -d nestjs_db']
+            interval: 10s
+            timeout: 5s
+            retries: 5
+
+    # NestJS Application Service
+    nestjs-app:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        container_name: nestjs-app
+        restart: unless-stopped
+        environment:
+            NODE_ENV: production
+            PORT: 3000
+            DATABASE_HOST: postgres
+            DATABASE_PORT: 5432
+            DATABASE_NAME: nestjs_db
+            DATABASE_USER: nestjs_user
+            DATABASE_PASSWORD: nestjs_password
+        ports:
+            - '3000:3000'
+        depends_on:
+            postgres:
+                condition: service_healthy
+        networks:
+            - nestjs-network
+        volumes:
+            - ./src:/app/src
+            - ./package.json:/app/package.json
+            - ./tsconfig.json:/app/tsconfig.json
+            - ./nest-cli.json:/app/nest-cli.json
+
+    # Development Service (optional - for development with hot reload)
+    nestjs-dev:
+        build:
+            context: .
+            dockerfile: Dockerfile.dev
+        container_name: nestjs-dev
+        restart: unless-stopped
+        environment:
+            NODE_ENV: development
+            PORT: 3001
+            DATABASE_HOST: postgres
+            DATABASE_PORT: 5432
+            DATABASE_NAME: nestjs_db
+            DATABASE_USER: nestjs_user
+            DATABASE_PASSWORD: nestjs_password
+        ports:
+            - '3001:3001'
+        depends_on:
+            postgres:
+                condition: service_healthy
+        networks:
+            - nestjs-network
+        volumes:
+            - ./src:/app/src
+            - ./package.json:/app/package.json
+            - ./tsconfig.json:/app/tsconfig.json
+            - ./nest-cli.json:/app/nest-cli.json
+            - ./pnpm-lock.yaml:/app/pnpm-lock.yaml
+            - /app/node_modules
+        profiles:
+            - dev
+
+volumes:
+    postgres_data:
+        driver: local
+
+networks:
+    nestjs-network:
+        driver: bridge
