@@ -21,7 +21,7 @@ import { Cat } from './interfaces/cat.interface'
 export class CatsController {
     // The CatsService is injected through the class constructor.
     // private catsService: CatsService <--- 같은 줄에서 멤버로 선언하고 초기화 하는 단축코드
-    // IoC가 주입한다.
+    // NestJS의 의존성 주입 시스템은 **의존성 역전 원칙(Dependency Inversion Principle, DIP)**을 따르는 좋은 예입니다. 컨트롤러(고수준 모듈)가 서비스(저수준 모듈)의 구체적인 생성 방식에 의존하는 대신, NestJS라는 프레임워크가 중간에서 의존성을 "주입"해줌으로써 둘 다 추상화(이 경우, 서비스 클래스 자체 또는 인터페이스)에 의존하게 됩니다. 이로 인해 유연하고 테스트하기 쉬운 코드를 작성할 수 있게 되죠.
     constructor(private catsService: CatsService) {}
     // private userSpecificData: string
     // 이런 식으로 요청별 데이터를 인스턴스 변수에 저장하면 안 됩니다! api endpoint는 stateless 해야 함.
@@ -30,6 +30,7 @@ export class CatsController {
     @Post()
     // @HttpCode(204)
     // @Header('Cache-Control', 'no-store')
+    // 클래스는 자바스크립트 ES6 표준의 한 부분이므로 자바스크립트로 컴파일 될 때, 사라지지 않고 실제 요소로 보존 그렇기 때문에 Pipes 같은 기능에서 런타임에 변수의 메타타입에 접근할 수 있음. 따서 DTO는 클래스로 선언하는 것이 좋음.
     create(@Body() createCatDto: CreateCatDto): void {
         this.catsService.create(createCatDto)
     }
