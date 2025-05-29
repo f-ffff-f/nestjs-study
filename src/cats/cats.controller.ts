@@ -12,6 +12,7 @@ import {
     Query,
     Redirect,
     Req,
+    UseGuards,
     UsePipes,
 } from '@nestjs/common'
 import { Observable, of } from 'rxjs'
@@ -20,6 +21,9 @@ import { CreateCatDto } from './dto/create-cat.dto'
 import { Cat } from './interfaces/cat.interface'
 import { JoiValidationPipe } from 'src/cats/pipe/joi-validation.pipe'
 import { createCatSchema } from './schemas/create-cat.schema'
+import { Roles } from 'src/role/role.decorator'
+import { Role } from 'src/role/role.enum'
+import { RolesGuard } from 'src/role/role.guard'
 
 // nest g controller cats 명령어로 생성된 컨트롤러 클래스. 자동으로 보일러 플레이트를 생성해줌.
 // @Controller('공통적으로 적용될 path prefix')
@@ -33,8 +37,10 @@ export class CatsController {
     // 이런 식으로 요청별 데이터를 인스턴스 변수에 저장하면 안 됩니다! api endpoint는 stateless 해야 함.
     // 따라서 요청별 데이터를 저장하려면 요청 객체를 인자로 받아서 사용해야 함.
 
-    @Post()
+    @UseGuards(RolesGuard)
+    @Roles(Role.Admin)
     @UsePipes(new JoiValidationPipe(createCatSchema))
+    @Post()
     // @HttpCode(204)
     // @Header('Cache-Control', 'no-store')
     // 클래스는 자바스크립트 ES6 표준의 한 부분이므로 자바스크립트로 컴파일 될 때, 사라지지 않고 실제 요소로 보존 그렇기 때문에 Pipes 같은 기능에서 런타임에 변수의 메타타입에 접근할 수 있음. 따서 DTO는 클래스로 선언하는 것이 좋음.
@@ -53,6 +59,8 @@ export class CatsController {
     //     await new Promise((resolve) => setTimeout(resolve, 1000))
     //     return []
     // }
+    @UseGuards(RolesGuard)
+    @Roles(Role.Admin)
     @Get()
     findAll(): Observable<Cat[]> {
         return of(this.catsService.findAll())

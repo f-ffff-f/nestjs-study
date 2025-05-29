@@ -11,13 +11,18 @@ import {
 import { AuthGuard } from './auth.guard'
 import { AuthService } from './auth.service'
 
+class SignInDto {
+    username: string
+    password: string
+}
 @Controller('auth')
 export class AuthController {
     constructor(private authService: AuthService) {}
 
     @HttpCode(HttpStatus.OK)
     @Post('login')
-    signIn(@Body() signInDto: Record<string, any>) {
+    signIn(@Body() signInDto: SignInDto) {
+        console.log(signInDto)
         return this.authService.signIn(signInDto.username, signInDto.password)
     }
 

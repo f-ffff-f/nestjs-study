@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { UsersService, User } from './users.service'
+import { Role } from 'src/role/role.enum'
 
 describe('UsersService', () => {
     let service: UsersService
@@ -10,13 +11,15 @@ describe('UsersService', () => {
         mockUsersData = [
             {
                 userId: 1,
-                username: 'john',
+                username: 'test',
                 password: 'changeme',
+                roles: [Role.Admin],
             },
             {
                 userId: 2,
                 username: 'maria',
                 password: 'guess',
+                roles: [Role.User],
             },
         ]
 
@@ -41,16 +44,22 @@ describe('UsersService', () => {
         expect(service).toBeDefined()
     })
 
+    describe('findOne', () => {
+        it('should return a user by username', async () => {
+            const user = await service.findOne(mockUsersData[0].username)
+            expect(user).toEqual(mockUsersData[0])
+        })
+    })
+
     describe('with spy', () => {
         it('should spy on findOne method', async () => {
             // 실제 메서드를 스파이로 감시
             const findOneSpy = jest.spyOn(service, 'findOne')
 
-            const username = 'john'
-            await service.findOne(username)
+            await service.findOne(mockUsersData[0].username)
 
             // 스파이를 통해 메서드 호출 확인
-            expect(findOneSpy).toHaveBeenCalledWith(username)
+            expect(findOneSpy).toHaveBeenCalledWith(mockUsersData[0].username)
             expect(findOneSpy).toHaveBeenCalledTimes(1)
 
             // 스파이 정리
